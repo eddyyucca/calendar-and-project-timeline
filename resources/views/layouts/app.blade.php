@@ -320,6 +320,53 @@
             box-shadow: 0 .8rem 2rem rgba(15, 23, 42, .14);
         }
 
+        .navbar .notification-toggle {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: .5rem;
+            border-radius: .65rem;
+            color: #334155;
+        }
+
+        .navbar .notification-toggle:hover {
+            background: #eef6ff;
+            color: var(--blue-main);
+        }
+
+        .navbar .notification-toggle .fa-bell {
+            font-size: 1.08rem;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: 4px;
+            right: 3px;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f59e0b;
+            color: #111827;
+            border: 2px solid #fff;
+            font-size: .68rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .navbar-date {
+            min-height: 42px;
+            padding: 0 .75rem;
+            border-left: 1px solid #e5edf7;
+            border-right: 1px solid #e5edf7;
+        }
+
         .notification-header {
             display: flex;
             align-items: center;
@@ -409,6 +456,16 @@
             .modal-dialog {
                 margin: .65rem;
             }
+
+            .navbar .notification-toggle {
+                margin-right: .15rem;
+            }
+
+            .notification-menu {
+                width: calc(100vw - 1rem);
+                right: .5rem !important;
+                left: auto !important;
+            }
         }
     </style>
 </head>
@@ -425,10 +482,10 @@
 
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">
-                <a class="nav-link" data-toggle="dropdown" href="#" aria-label="Notifikasi">
+                <a class="nav-link notification-toggle" data-toggle="dropdown" href="#" aria-label="Notifikasi">
                     <i class="far fa-bell"></i>
                     @if (($headerNotificationCount ?? 0) > 0)
-                        <span class="badge badge-warning navbar-badge">{{ $headerNotificationCount > 9 ? '9+' : $headerNotificationCount }}</span>
+                        <span class="notification-count">{{ $headerNotificationCount > 9 ? '9+' : $headerNotificationCount }}</span>
                     @endif
                 </a>
                 <div class="dropdown-menu dropdown-menu-right notification-menu">
@@ -452,7 +509,7 @@
                     </div>
                 </div>
             </li>
-            <li class="nav-item d-none d-md-flex align-items-center mr-3 text-muted">
+            <li class="nav-item d-none d-md-flex align-items-center mr-3 text-muted navbar-date">
                 <i class="far fa-calendar-alt mr-2"></i>{{ now()->translatedFormat('d M Y') }}
             </li>
             <li class="nav-item dropdown">
