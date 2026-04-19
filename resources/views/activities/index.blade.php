@@ -2,16 +2,22 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header border-0">
+    <div class="card-header border-0 d-flex align-items-center flex-wrap gap-2">
+        <h3 class="card-title mr-auto">Daftar Aktivitas</h3>
+        <a href="{{ route('activities.create') }}" class="btn btn-success btn-sm">
+            <i class="fas fa-plus mr-1"></i>Tambah Aktivitas
+        </a>
+    </div>
+    <div class="card-body border-top pt-3 pb-2">
         <form method="GET" action="{{ route('activities.index') }}" class="row align-items-end">
             <div class="{{ auth()->user()->isAdmin() ? 'col-md-4' : 'col-md-5' }} mb-2">
-                <label for="search">Cari Aktivitas</label>
-                <input type="text" id="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Judul, deskripsi, kategori">
+                <label for="search" class="small font-weight-bold mb-1">Cari Aktivitas</label>
+                <input type="text" id="search" name="search" value="{{ request('search') }}" class="form-control form-control-sm" placeholder="Judul, deskripsi, kategori">
             </div>
             @if (auth()->user()->isAdmin())
                 <div class="col-md-3 mb-2">
-                    <label for="employee_id">Karyawan</label>
-                    <select id="employee_id" name="employee_id" class="form-control">
+                    <label for="employee_id" class="small font-weight-bold mb-1">Karyawan</label>
+                    <select id="employee_id" name="employee_id" class="form-control form-control-sm">
                         <option value="">Semua karyawan</option>
                         @foreach ($employees as $employee)
                             <option value="{{ $employee->id }}" @selected((int) request('employee_id') === $employee->id)>
@@ -21,25 +27,23 @@
                     </select>
                 </div>
             @endif
-            <div class="col-md-3 mb-2">
-                <label for="status">Status</label>
-                <select id="status" name="status" class="form-control">
+            <div class="{{ auth()->user()->isAdmin() ? 'col-md-3' : 'col-md-4' }} mb-2">
+                <label for="status" class="small font-weight-bold mb-1">Status</label>
+                <select id="status" name="status" class="form-control form-control-sm">
                     <option value="">Semua status</option>
                     @foreach ($statuses as $status)
                         <option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="{{ auth()->user()->isAdmin() ? 'col-md-2' : 'col-md-4' }} mb-2">
-                <div class="btn-group-responsive text-md-right">
-                    <button type="submit" class="btn btn-primary">
+            <div class="{{ auth()->user()->isAdmin() ? 'col-md-2' : 'col-md-3' }} mb-2">
+                <label class="invisible small mb-1">.</label>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm flex-fill">
                         <i class="fas fa-search mr-1"></i>Filter
                     </button>
-                    <a href="{{ route('activities.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('activities.index') }}" class="btn btn-outline-secondary btn-sm flex-fill">
                         <i class="fas fa-sync-alt mr-1"></i>Reset
-                    </a>
-                    <a href="{{ route('activities.create') }}" class="btn btn-success">
-                        <i class="fas fa-plus mr-1"></i>Tambah
                     </a>
                 </div>
             </div>

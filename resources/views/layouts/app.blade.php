@@ -232,6 +232,8 @@
             flex: 0 0 auto;
         }
 
+        .gap-2 { gap: .5rem; }
+
         .progress {
             height: .7rem;
             border-radius: 999px;
