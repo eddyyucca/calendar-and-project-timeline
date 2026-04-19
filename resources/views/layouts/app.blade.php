@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ $title ?? 'Daily Activity' }} | HRGA</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --blue-main: #0f5fb8;
+            --blue-deep: #084887;
+            --blue-soft: #e8f2ff;
+            --ink: #1f2937;
+            --muted: #64748b;
+            --line: #dbeafe;
+        }
+
+        body {
+            color: var(--ink);
+            font-size: 15px;
+        }
+
+        .brand-link,
+        .main-sidebar {
+            background: linear-gradient(180deg, #073b73 0%, var(--blue-deep) 42%, var(--blue-main) 100%);
+        }
+
+        .brand-link {
+            display: flex;
+            align-items: center;
+            min-height: 64px;
+            padding: .75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .14);
+            overflow: hidden;
+        }
+
+        .brand-link .brand-text,
+        .brand-link .brand-image {
+            color: #fff;
+        }
+
+        .brand-icon {
+            flex: 0 0 38px;
+            width: 38px;
+            height: 38px;
+            border-radius: .65rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: var(--blue-main);
+            box-shadow: 0 .35rem 1rem rgba(0, 0, 0, .12);
+        }
+
+        .brand-copy {
+            min-width: 0;
+            margin-left: .75rem;
+            line-height: 1.1;
+        }
+
+        .brand-copy strong,
+        .brand-copy small,
+        .sidebar-user-meta,
+        .sidebar-user-name {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .brand-copy small {
+            color: rgba(255, 255, 255, .64);
+            font-size: .75rem;
+            margin-top: .2rem;
+        }
+
+        .sidebar {
+            padding: .8rem .45rem 1rem;
+        }
+
+        .sidebar-user-card {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: .8rem;
+            margin: .2rem .35rem 1rem;
+            border: 1px solid rgba(255, 255, 255, .14);
+            border-radius: .75rem;
+            background: rgba(255, 255, 255, .1);
+            color: #fff;
+        }
+
+        .sidebar-avatar {
+            flex: 0 0 38px;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: var(--blue-main);
+            font-weight: 800;
+        }
+
+        .sidebar-user-info {
+            min-width: 0;
+        }
+
+        .sidebar-user-name {
+            color: #fff;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .sidebar-user-meta {
+            color: rgba(255, 255, 255, .68);
+            font-size: .78rem;
+            margin-top: .18rem;
+        }
+
+        .nav-sidebar .nav-header {
+            margin: .85rem .75rem .35rem;
+            padding: 0;
+            color: rgba(255, 255, 255, .58) !important;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .main-sidebar .nav-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, .86);
+            border-radius: .55rem;
+            min-height: 42px;
+            margin: .15rem .35rem;
+            padding: .68rem .8rem;
+            line-height: 1.1;
+        }
+
+        .main-sidebar .nav-link.active,
+        .main-sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, .18);
+            color: #fff;
+            box-shadow: inset 3px 0 0 #fff;
+        }
+
+        .nav-sidebar .nav-icon {
+            width: 1.45rem;
+            margin-right: .55rem !important;
+            text-align: center;
+            font-size: .95rem;
+        }
+
+        .nav-sidebar .nav-link p {
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .navbar-white {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .content-wrapper {
+            background: #f5f8fc;
+        }
+
+        .content-header h1 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .breadcrumb {
+            background: transparent;
+            padding: .25rem 0;
+            margin-bottom: 0;
+        }
+
+        .btn-primary,
+        .page-item.active .page-link {
+            background-color: var(--blue-main);
+            border-color: var(--blue-main);
+        }
+
+        .text-primary {
+            color: var(--blue-main) !important;
+        }
+
+        .small-box {
+            border-radius: .5rem;
+            overflow: hidden;
+        }
+
+        .card {
+            border-radius: .5rem;
+            border: 1px solid #e5edf7;
+            box-shadow: 0 .2rem .7rem rgba(15, 95, 184, .06);
+        }
+
+        .card-header {
+            min-height: 54px;
+        }
+
+        .card-title {
+            float: none;
+            margin-bottom: 0;
+        }
+
+        .card-header .btn,
+        .card-header .btn-group {
+            flex: 0 0 auto;
+        }
+
+        .progress {
+            height: .7rem;
+            border-radius: 999px;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+        }
+
+        .main-footer {
+            border-top: 1px solid #dbeafe;
+            color: #5f6f82;
+            font-size: .9rem;
+        }
+
+        .modal-backdrop.show {
+            opacity: .42;
+        }
+
+        .modal-content {
+            border: 0;
+            border-radius: .75rem;
+            box-shadow: 0 1.25rem 3rem rgba(15, 23, 42, .24);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            align-items: center;
+            background: linear-gradient(135deg, var(--blue-deep), var(--blue-main));
+            color: #fff;
+            border-bottom: 0;
+            padding: 1rem 1.25rem;
+        }
+
+        .modal-title {
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .modal-header .close {
+            color: #fff;
+            opacity: .9;
+            text-shadow: none;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+        }
+
+        .modal-footer {
+            background: #f8fbff;
+            border-top: 1px solid var(--line);
+            padding: .9rem 1.25rem;
+        }
+
+        .modal .form-group label {
+            color: #334155;
+            font-size: .88rem;
+            font-weight: 700;
+        }
+
+        .modal .form-control {
+            border-color: #d7e3f2;
+            border-radius: .45rem;
+        }
+
+        .table-action-group {
+            display: inline-flex;
+            gap: .35rem;
+            justify-content: flex-end;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .table-action-group form {
+            display: inline-flex;
+        }
+
+        .sidebar-collapse .brand-copy,
+        .sidebar-collapse .sidebar-user-info,
+        .sidebar-collapse .nav-sidebar .nav-link p,
+        .sidebar-collapse .nav-sidebar .nav-header {
+            display: none !important;
+        }
+
+        .sidebar-collapse .brand-link {
+            justify-content: center;
+            padding-left: .5rem;
+            padding-right: .5rem;
+        }
+
+        .sidebar-collapse .brand-icon {
+            margin: 0;
+        }
+
+        .sidebar-collapse .sidebar-user-card {
+            justify-content: center;
+            padding: .65rem .35rem;
+            margin-left: .25rem;
+            margin-right: .25rem;
+        }
+
+        .sidebar-collapse .main-sidebar .nav-link {
+            justify-content: center;
+            padding-left: .5rem;
+            padding-right: .5rem;
+        }
+
+        .sidebar-collapse .nav-sidebar .nav-icon {
+            margin-right: 0 !important;
+        }
+
+        @media (max-width: 575.98px) {
+            .content-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .btn-group-responsive {
+                display: grid;
+                gap: .5rem;
+            }
+
+            .content-header .breadcrumb {
+                float: none !important;
+                margin-top: .35rem;
+            }
+
+            .modal-dialog {
+                margin: .65rem;
+            }
+        }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" data-widget="pushmenu" href="#" role="button" aria-label="Toggle menu">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item d-none d-sm-inline-block">
+                <a href="{{ route('activities.index') }}" class="nav-link">Daily Activity</a>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item d-none d-md-flex align-items-center mr-3 text-muted">
+                <i class="far fa-calendar-alt mr-2"></i>{{ now()->translatedFormat('d M Y') }}
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#" aria-label="User menu">
+                    <i class="far fa-user-circle mr-1"></i>{{ auth()->user()->name }}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <span class="dropdown-item-text text-muted">{{ auth()->user()->email }}</span>
+                    <span class="dropdown-item-text">
+                        <span class="badge badge-primary">{{ auth()->user()->isAdmin() ? 'Admin' : 'Karyawan' }}</span>
+                    </span>
+                    <div class="dropdown-divider"></div>
+                    <a href="{{ route('password.edit') }}" class="dropdown-item">
+                        <i class="fas fa-key mr-2"></i>Ganti Password
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <a href="{{ route('dashboard') }}" class="brand-link">
+            <span class="brand-icon">
+                <i class="fas fa-tasks"></i>
+            </span>
+            <span class="brand-copy">
+                <strong>HRGA Activity</strong>
+                <small>Daily monitoring</small>
+            </span>
+        </a>
+
+        <div class="sidebar">
+            <div class="sidebar-user-card">
+                <span class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                <div class="sidebar-user-info">
+                    <a href="{{ route('dashboard') }}" class="sidebar-user-name">{{ auth()->user()->name }}</a>
+                    <span class="sidebar-user-meta">{{ auth()->user()->isAdmin() ? 'Superadmin' : 'Karyawan' }}</span>
+                </div>
+            </div>
+
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    <li class="nav-header text-white-50">DASHBOARD</li>
+                    <li class="nav-item">
+                        <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-chart-pie"></i>
+                            <p>Summary</p>
+                        </a>
+                    </li>
+                    <li class="nav-header text-white-50">AKTIVITAS</li>
+                    <li class="nav-item">
+                        <a href="{{ route('activities.index') }}" class="nav-link {{ request()->routeIs('activities.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-clipboard-list"></i>
+                            <p>Daily Activity</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('activities.create') }}" class="nav-link">
+                            <i class="nav-icon fas fa-plus-circle"></i>
+                            <p>Input Aktivitas</p>
+                        </a>
+                    </li>
+                    <li class="nav-header text-white-50">PERENCANAAN</li>
+                    <li class="nav-item">
+                        <a href="{{ route('calendar.index') }}" class="nav-link {{ request()->routeIs('calendar.*') ? 'active' : '' }}">
+                            <i class="nav-icon far fa-calendar-alt"></i>
+                            <p>Kalender</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('projects.index') }}" class="nav-link {{ request()->routeIs('projects.*') || request()->routeIs('project-tasks.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-project-diagram"></i>
+                            <p>Project Agile</p>
+                        </a>
+                    </li>
+                    @if (auth()->user()->isAdmin())
+                        <li class="nav-header text-white-50">ADMIN</li>
+                        <li class="nav-item">
+                            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-users-cog"></i>
+                                <p>Manajemen User</p>
+                            </a>
+                        </li>
+                    @endif
+                    <li class="nav-header text-white-50">AKUN</li>
+                    <li class="nav-item">
+                        <a href="{{ route('password.edit') }}" class="nav-link {{ request()->routeIs('password.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-key"></i>
+                            <p>Ganti Password</p>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-7">
+                        <h1>{{ $pageTitle ?? 'Daily Activity' }}</h1>
+                    </div>
+                    <div class="col-sm-5">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                            <li class="breadcrumb-item active">{{ $pageTitle ?? 'Daily Activity' }}</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid pb-4">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                @yield('content')
+            </div>
+        </section>
+    </div>
+
+    <footer class="main-footer d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+        <div><strong>HRGA Daily Activity</strong> &copy; {{ date('Y') }}</div>
+        <div class="mt-1 mt-sm-0">Monitoring pekerjaan, komentar, dan progress harian.</div>
+    </footer>
+</div>
+
+<div class="modal fade" id="confirmActionModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Konfirmasi Aksi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" id="confirmActionText">Lanjutkan aksi ini?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger" id="confirmActionButton">
+                    <i class="fas fa-check mr-1"></i>Ya, lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script>
+    let pendingConfirmForm = null;
+
+    document.addEventListener('submit', function (event) {
+        const form = event.target;
+        if (!form.matches('[data-confirm]') || form.dataset.confirmed === 'true') {
+            return;
+        }
+
+        event.preventDefault();
+        pendingConfirmForm = form;
+        document.getElementById('confirmActionText').textContent = form.dataset.confirm || 'Lanjutkan aksi ini?';
+        $('#confirmActionModal').modal('show');
+    });
+
+    document.getElementById('confirmActionButton').addEventListener('click', function () {
+        if (!pendingConfirmForm) {
+            return;
+        }
+
+        pendingConfirmForm.dataset.confirmed = 'true';
+        $('#confirmActionModal').modal('hide');
+        pendingConfirmForm.submit();
+    });
+</script>
+@stack('scripts')
+</body>
+</html>
