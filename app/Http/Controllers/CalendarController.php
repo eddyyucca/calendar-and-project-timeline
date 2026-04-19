@@ -13,11 +13,22 @@ class CalendarController extends Controller
 {
     public function index(Request $request): View
     {
-        $calendarEvents = CalendarEvent::query()
+        $calendarEventQuery = CalendarEvent::query()
             ->with('user')
+            ->when($request->filled('search'), function ($query) use ($request): void {
+                $search = $request->input('search');
+
+                $query->where(function ($subQuery) use ($search): void {
+                    $subQuery->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%")
+                        ->orWhere('type', 'like', "%{$search}%");
+                });
+            })
             ->orderBy('event_date')
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time');
+
+        $calendarEventsForCalendar = (clone $calendarEventQuery)->get();
+        $calendarEvents = (clone $calendarEventQuery)->paginate(10)->withQueryString();
 
         $activities = DailyActivity::query()
             ->with('user')
@@ -25,7 +36,7 @@ class CalendarController extends Controller
             ->orderBy('activity_date')
             ->get();
 
-        $events = $calendarEvents->map(fn (CalendarEvent $event) => [
+        $events = $calendarEventsForCalendar->map(fn (CalendarEvent $event) => [
             'id' => 'event-'.$event->id,
             'title' => $event->title,
             'start' => $event->event_date->format('Y-m-d').($event->start_time ? 'T'.$event->start_time : ''),

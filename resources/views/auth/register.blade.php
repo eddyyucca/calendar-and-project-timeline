@@ -3,7 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0f5fb8">
     <title>Register | HRGA Activity</title>
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/calendar-192.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
     <style>
@@ -16,7 +21,9 @@
 <body class="hold-transition register-page">
 <div class="register-box">
     <div class="register-logo">
-        <a href="{{ route('register') }}"><i class="fas fa-user-plus mr-2"></i>HRGA Activity</a>
+        <a href="{{ route('register') }}">
+            <img src="{{ asset('images/SCM-transparent.png') }}" alt="SCM" style="max-width: 220px; width: 80%; height: auto;">
+        </a>
     </div>
     <div class="card">
         <div class="card-body register-card-body">
@@ -52,5 +59,12 @@
         </div>
     </div>
 </div>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('{{ asset('sw.js') }}').catch(function () {});
+        });
+    }
+</script>
 </body>
 </html>

@@ -4,6 +4,15 @@
 <div class="row">
     <div class="col-lg-8">
         <div class="card">
+            <div class="card-body">
+                <h3 class="font-weight-bold mb-2">Buat Project Agile</h3>
+                <p class="text-muted mb-0">
+                    Project adalah wadah kerja untuk mengelola goal, sprint, dan backlog. Setelah project dibuat, Anda bisa menambahkan sprint dan memecah pekerjaan menjadi item kecil yang dapat dipantau di Kanban board.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
             <form method="POST" action="{{ route('projects.store') }}">
                 @csrf
                 <div class="card-body">

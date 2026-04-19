@@ -29,6 +29,52 @@
     </div>
 @endif
 
+<div class="card">
+    <div class="card-header border-0 d-flex align-items-center justify-content-between">
+        <h3 class="card-title font-weight-bold"><i class="far fa-bell text-primary mr-2"></i>Notifikasi Hari Ini</h3>
+        <span class="badge badge-primary">{{ $todayReminders->count() + $blocked }} item</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="row no-gutters">
+            <div class="col-lg-6 border-right">
+                <div class="p-3">
+                    <h6 class="font-weight-bold mb-3">Event Kalender</h6>
+                    <ul class="list-group list-group-flush">
+                        @forelse ($todayReminders as $reminder)
+                            <li class="list-group-item px-0">
+                                <strong>{{ $reminder->title }}</strong>
+                                <div class="small text-muted">
+                                    {{ $reminder->type_label }}
+                                    @if ($reminder->start_time)
+                                        - {{ substr($reminder->start_time, 0, 5) }}
+                                    @endif
+                                </div>
+                            </li>
+                        @empty
+                            <li class="list-group-item px-0 text-muted">Tidak ada event hari ini.</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="p-3">
+                    <h6 class="font-weight-bold mb-3">Aktivitas Perlu Perhatian</h6>
+                    <ul class="list-group list-group-flush">
+                        @forelse ($todayActivities->whereIn('status', ['Belum Mulai', 'Berjalan', 'Tertunda'])->take(5) as $activity)
+                            <li class="list-group-item px-0">
+                                <a href="{{ route('activities.show', $activity) }}" class="font-weight-bold">{{ $activity->title }}</a>
+                                <div class="small text-muted">{{ $activity->status }} - {{ $activity->progress }}%</div>
+                            </li>
+                        @empty
+                            <li class="list-group-item px-0 text-muted">Tidak ada aktivitas yang perlu perhatian hari ini.</li>
+                        @endforelse
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-primary">

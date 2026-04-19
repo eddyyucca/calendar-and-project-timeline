@@ -2,11 +2,20 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header border-0 d-flex align-items-center justify-content-between">
-        <h3 class="card-title font-weight-bold">Daftar Project</h3>
+    <div class="card-body d-flex flex-column flex-lg-row align-items-lg-center justify-content-between">
+        <div class="mb-3 mb-lg-0">
+            <h3 class="font-weight-bold mb-2">Kelola Project Dengan Alur Agile</h3>
+        </div>
         <a href="{{ route('projects.create') }}" class="btn btn-primary">
             <i class="fas fa-plus mr-1"></i>Project Baru
         </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header border-0 d-flex align-items-center justify-content-between">
+        <h3 class="card-title font-weight-bold">Daftar Project</h3>
+        <span class="text-muted small">{{ $projects->total() }} project</span>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

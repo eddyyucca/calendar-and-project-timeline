@@ -2,20 +2,70 @@
 
 @section('content')
 <style>
+    .project-hero {
+        border: 1px solid #e5edf7;
+        border-radius: .75rem;
+        background: #fff;
+        padding: 1.1rem;
+        box-shadow: 0 .2rem .7rem rgba(15, 95, 184, .06);
+    }
+
+    .project-hero-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        margin-bottom: .35rem;
+    }
+
+    .project-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+        gap: .75rem;
+        margin-top: 1rem;
+    }
+
+    .project-meta-item {
+        border: 1px solid #e5edf7;
+        border-radius: .6rem;
+        padding: .8rem;
+        background: #f8fbff;
+    }
+
+    .project-meta-label {
+        color: #64748b;
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .project-meta-value {
+        display: block;
+        color: #1f2937;
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-top: .25rem;
+    }
+
+    .agile-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        justify-content: flex-end;
+    }
+
     .agile-board {
         display: grid;
-        grid-template-columns: repeat(5, minmax(220px, 1fr));
-        gap: .85rem;
+        grid-template-columns: repeat(5, minmax(250px, 1fr));
+        gap: .9rem;
         overflow-x: auto;
         padding-bottom: .5rem;
     }
 
     .agile-column {
-        min-width: 220px;
+        min-width: 250px;
         background: #f8fbff;
         border: 1px solid #e5edf7;
-        border-radius: .65rem;
-        padding: .75rem;
+        border-radius: .7rem;
+        padding: .8rem;
     }
 
     .agile-column-title {
@@ -23,16 +73,16 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: .75rem;
-        font-weight: 800;
         color: #334155;
+        font-weight: 800;
     }
 
     .agile-task {
         border: 1px solid #e1eaf5;
-        border-radius: .6rem;
+        border-radius: .65rem;
         background: #fff;
-        padding: .75rem;
-        margin-bottom: .7rem;
+        padding: .8rem;
+        margin-bottom: .75rem;
         box-shadow: 0 .15rem .5rem rgba(15, 95, 184, .05);
     }
 
@@ -41,12 +91,47 @@
         color: #1f2937;
         font-weight: 800;
         line-height: 1.25;
-        margin-bottom: .45rem;
+        margin-bottom: .5rem;
+    }
+
+    .agile-help-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .75rem;
+    }
+
+    .agile-help-item {
+        border: 1px solid #e5edf7;
+        border-radius: .6rem;
+        padding: .85rem;
+        background: #fff;
+    }
+
+    .agile-help-item strong {
+        display: block;
+        margin-bottom: .25rem;
     }
 
     @media (max-width: 991.98px) {
+        .project-meta-grid,
+        .agile-help-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
         .agile-board {
-            grid-template-columns: repeat(5, 240px);
+            grid-template-columns: repeat(5, 260px);
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .project-meta-grid,
+        .agile-help-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .agile-actions {
+            display: grid;
+            justify-content: stretch;
         }
     }
 </style>
@@ -54,6 +139,7 @@
 @php
     $doneCount = $project->tasks->where('status', 'done')->count();
     $progress = $project->tasks->count() > 0 ? (int) round(($doneCount / $project->tasks->count()) * 100) : 0;
+    $activeSprint = $project->sprints->where('status', 'active')->sortByDesc('start_date')->first();
     $statusLabels = [
         'backlog' => 'Backlog',
         'todo' => 'To Do',
@@ -63,104 +149,151 @@
     ];
 @endphp
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header border-0 d-flex align-items-center justify-content-between">
-                <h3 class="card-title font-weight-bold">Agile Board</h3>
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#taskModal">
-                    <i class="fas fa-plus mr-1"></i>Backlog Item
-                </button>
-            </div>
-            <div class="card-body">
-                <div class="agile-board">
-                    @foreach ($board as $status => $tasks)
-                        <div class="agile-column">
-                            <div class="agile-column-title">
-                                <span>{{ $statusLabels[$status] }}</span>
-                                <span class="badge badge-primary">{{ $tasks->count() }}</span>
-                            </div>
-                            @forelse ($tasks as $task)
-                                <div class="agile-task">
-                                    <span class="agile-task-title">{{ $task->title }}</span>
-                                    <div class="mb-2">
-                                        <span class="badge badge-light border text-capitalize">{{ $task->type }}</span>
-                                        <span class="badge badge-warning text-capitalize">{{ $task->priority }}</span>
-                                        <span class="badge badge-info">{{ $task->story_points }} SP</span>
-                                    </div>
-                                    <div class="small text-muted mb-2">
-                                        {{ $task->assignee?->name ?? 'Unassigned' }}
-                                        @if ($task->sprint)
-                                            - {{ $task->sprint->name }}
-                                        @endif
-                                    </div>
-                                    <form method="POST" action="{{ route('project-tasks.status', $task) }}">
-                                        @csrf
-                                        @method('PATCH')
-                                        <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
-                                            @foreach ($statuses as $nextStatus)
-                                                <option value="{{ $nextStatus }}" @selected($task->status === $nextStatus)>{{ $statusLabels[$nextStatus] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </form>
-                                </div>
-                            @empty
-                                <div class="text-muted small">Belum ada item.</div>
-                            @endforelse
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+<div class="project-hero mb-3">
+    <div class="d-flex flex-column flex-lg-row justify-content-between">
+        <div class="pr-lg-4">
+            <div class="project-hero-title">Workspace Agile Project</div>
+            <p class="text-muted mb-2">
+                Halaman ini dipakai untuk mengelola project dengan ritme agile: susun product goal, pecah pekerjaan menjadi backlog item, kelompokkan ke sprint, lalu pantau alurnya di board Kanban.
+            </p>
+            <p class="mb-0">{{ $project->goal ?: 'Belum ada product goal. Tambahkan goal agar tim punya arah yang sama.' }}</p>
+        </div>
+        <div class="agile-actions mt-3 mt-lg-0">
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#taskModal">
+                <i class="fas fa-plus mr-1"></i>Backlog Item
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#sprintModal">
+                <i class="fas fa-running mr-1"></i>Sprint
+            </button>
+            <a href="{{ route('projects.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left mr-1"></i>Project
+            </a>
         </div>
     </div>
 
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header border-0">
-                <h3 class="card-title font-weight-bold">Project Summary</h3>
-            </div>
-            <div class="card-body">
-                <p class="text-muted">{{ $project->goal ?: 'Belum ada product goal.' }}</p>
-                <div class="d-flex justify-content-between">
-                    <strong>Progress</strong>
-                    <strong>{{ $progress }}%</strong>
-                </div>
-                <div class="progress my-2">
-                    <div class="progress-bar bg-primary" style="width: {{ $progress }}%"></div>
-                </div>
-                <div class="small text-muted">{{ $doneCount }} dari {{ $project->tasks->count() }} item selesai</div>
-                <hr>
-                <div class="small text-muted">Owner</div>
-                <strong>{{ $project->owner->name }}</strong>
-                <div class="small text-muted mt-2">Target</div>
-                <strong>{{ $project->target_date?->format('d/m/Y') ?? '-' }}</strong>
+    <div class="project-meta-grid">
+        <div class="project-meta-item">
+            <span class="project-meta-label">Progress</span>
+            <span class="project-meta-value">{{ $progress }}%</span>
+            <div class="progress mt-2">
+                <div class="progress-bar bg-primary" style="width: {{ $progress }}%"></div>
             </div>
         </div>
+        <div class="project-meta-item">
+            <span class="project-meta-label">Backlog Done</span>
+            <span class="project-meta-value">{{ $doneCount }}/{{ $project->tasks->count() }}</span>
+        </div>
+        <div class="project-meta-item">
+            <span class="project-meta-label">Active Sprint</span>
+            <span class="project-meta-value">{{ $activeSprint?->name ?? '-' }}</span>
+        </div>
+        <div class="project-meta-item">
+            <span class="project-meta-label">Target</span>
+            <span class="project-meta-value">{{ $project->target_date?->format('d/m/Y') ?? '-' }}</span>
+        </div>
+    </div>
+</div>
 
+<div class="card">
+    <div class="card-header border-0 d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+        <div>
+            <h3 class="card-title font-weight-bold">Kanban Board</h3>
+            <div class="text-muted small mt-1">Pindahkan status item untuk menggambarkan flow kerja dari backlog sampai selesai.</div>
+        </div>
+        <span class="badge badge-light border text-capitalize mt-2 mt-md-0">{{ str_replace('_', ' ', $project->status) }}</span>
+    </div>
+    <div class="card-body">
+        <div class="agile-board">
+            @foreach ($board as $status => $tasks)
+                <div class="agile-column">
+                    <div class="agile-column-title">
+                        <span>{{ $statusLabels[$status] }}</span>
+                        <span class="badge badge-primary">{{ $tasks->count() }}</span>
+                    </div>
+                    @forelse ($tasks as $task)
+                        <div class="agile-task">
+                            <span class="agile-task-title">{{ $task->title }}</span>
+                            <div class="mb-2">
+                                <span class="badge badge-light border text-capitalize">{{ $task->type }}</span>
+                                <span class="badge badge-warning text-capitalize">{{ $task->priority }}</span>
+                                <span class="badge badge-info">{{ $task->story_points }} SP</span>
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <i class="far fa-user mr-1"></i>{{ $task->assignee?->name ?? 'Unassigned' }}
+                                @if ($task->sprint)
+                                    <br><i class="fas fa-running mr-1"></i>{{ $task->sprint->name }}
+                                @endif
+                            </div>
+                            <form method="POST" action="{{ route('project-tasks.status', $task) }}">
+                                @csrf
+                                @method('PATCH')
+                                <select name="status" class="form-control form-control-sm" onchange="this.form.submit()">
+                                    @foreach ($statuses as $nextStatus)
+                                        <option value="{{ $nextStatus }}" @selected($task->status === $nextStatus)>{{ $statusLabels[$nextStatus] }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        </div>
+                    @empty
+                        <div class="text-muted small">Belum ada item.</div>
+                    @endforelse
+                </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
         <div class="card">
-            <div class="card-header border-0 d-flex align-items-center justify-content-between">
-                <h3 class="card-title font-weight-bold">Sprint</h3>
-                <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#sprintModal">
-                    <i class="fas fa-plus mr-1"></i>Tambah
-                </button>
+            <div class="card-header border-0">
+                <h3 class="card-title font-weight-bold">Sprint Plan</h3>
             </div>
             <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
                     @forelse ($project->sprints->sortByDesc('start_date') as $sprint)
                         <li class="list-group-item">
-                            <strong>{{ $sprint->name }}</strong>
-                            <div class="small text-muted">
-                                {{ $sprint->start_date->format('d/m/Y') }} - {{ $sprint->end_date->format('d/m/Y') }}
-                                - {{ ucfirst($sprint->status) }}
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ $sprint->name }}</strong>
+                                    <div class="small text-muted">
+                                        {{ $sprint->start_date->format('d/m/Y') }} - {{ $sprint->end_date->format('d/m/Y') }}
+                                        - {{ ucfirst($sprint->status) }}
+                                    </div>
+                                    @if ($sprint->goal)
+                                        <div class="small mt-1">{{ $sprint->goal }}</div>
+                                    @endif
+                                </div>
+                                <span class="badge badge-light border align-self-start">{{ $sprint->tasks->count() }} item</span>
                             </div>
-                            @if ($sprint->goal)
-                                <div class="small mt-1">{{ $sprint->goal }}</div>
-                            @endif
                         </li>
                     @empty
-                        <li class="list-group-item text-muted">Belum ada sprint.</li>
+                        <li class="list-group-item text-muted">Belum ada sprint. Buat sprint untuk mengelompokkan backlog dalam periode kerja tertentu.</li>
                     @endforelse
                 </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header border-0">
+                <h3 class="card-title font-weight-bold">Fungsi Utama</h3>
+            </div>
+            <div class="card-body">
+                <div class="agile-help-grid">
+                    <div class="agile-help-item">
+                        <strong>Product Goal</strong>
+                        <span class="text-muted small">Menjelaskan hasil akhir yang ingin dicapai project.</span>
+                    </div>
+                    <div class="agile-help-item">
+                        <strong>Sprint</strong>
+                        <span class="text-muted small">Periode kerja singkat untuk menyelesaikan item prioritas.</span>
+                    </div>
+                    <div class="agile-help-item">
+                        <strong>Board</strong>
+                        <span class="text-muted small">Memantau posisi setiap item dari backlog sampai done.</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

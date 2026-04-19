@@ -4,7 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#0f5fb8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="HRGA Activity">
     <title>{{ $title ?? 'Daily Activity' }} | HRGA</title>
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('icons/favicon-32.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/calendar-192.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
     <style>
@@ -41,17 +49,24 @@
             color: #fff;
         }
 
-        .brand-icon {
-            flex: 0 0 38px;
-            width: 38px;
+        .brand-logo-frame {
+            flex: 0 0 50px;
+            width: 50px;
             height: 38px;
-            border-radius: .65rem;
+            border-radius: .55rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: #fff;
-            color: var(--blue-main);
+            background: rgba(255, 255, 255, .95);
             box-shadow: 0 .35rem 1rem rgba(0, 0, 0, .12);
+            overflow: hidden;
+            padding: .18rem;
+        }
+
+        .brand-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .brand-copy {
@@ -296,6 +311,52 @@
             display: inline-flex;
         }
 
+        .notification-menu {
+            width: min(92vw, 360px);
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: .65rem;
+            box-shadow: 0 .8rem 2rem rgba(15, 23, 42, .14);
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .8rem 1rem;
+            background: #f8fbff;
+            border-bottom: 1px solid var(--line);
+            font-weight: 800;
+        }
+
+        .notification-item {
+            display: flex;
+            gap: .75rem;
+            padding: .75rem 1rem;
+            color: var(--ink);
+            border-bottom: 1px solid #eef4fb;
+        }
+
+        .notification-item:hover {
+            background: #f8fbff;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .notification-title {
+            display: block;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .notification-meta {
+            display: block;
+            color: var(--muted);
+            font-size: .82rem;
+            margin-top: .15rem;
+        }
+
         .sidebar-collapse .brand-copy,
         .sidebar-collapse .sidebar-user-info,
         .sidebar-collapse .nav-sidebar .nav-link p,
@@ -309,7 +370,7 @@
             padding-right: .5rem;
         }
 
-        .sidebar-collapse .brand-icon {
+        .sidebar-collapse .brand-logo-frame {
             margin: 0;
         }
 
@@ -360,15 +421,37 @@
                     <i class="fas fa-bars"></i>
                 </a>
             </li>
-            <li class="nav-item d-none d-sm-inline-block">
-                <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
-            </li>
-            <li class="nav-item d-none d-sm-inline-block">
-                <a href="{{ route('activities.index') }}" class="nav-link">Daily Activity</a>
-            </li>
         </ul>
 
         <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#" aria-label="Notifikasi">
+                    <i class="far fa-bell"></i>
+                    @if (($headerNotificationCount ?? 0) > 0)
+                        <span class="badge badge-warning navbar-badge">{{ $headerNotificationCount > 9 ? '9+' : $headerNotificationCount }}</span>
+                    @endif
+                </a>
+                <div class="dropdown-menu dropdown-menu-right notification-menu">
+                    <div class="notification-header">
+                        <span>Notifikasi</span>
+                        <span class="badge badge-primary">{{ $headerNotificationCount ?? 0 }}</span>
+                    </div>
+                    @forelse (($headerNotifications ?? collect()) as $notification)
+                        <a href="{{ $notification['url'] }}" class="notification-item">
+                            <i class="{{ $notification['icon'] }} {{ $notification['color'] }} mt-1"></i>
+                            <span>
+                                <span class="notification-title">{{ $notification['title'] }}</span>
+                                <span class="notification-meta">{{ $notification['meta'] }}</span>
+                            </span>
+                        </a>
+                    @empty
+                        <div class="px-3 py-4 text-center text-muted">Tidak ada notifikasi.</div>
+                    @endforelse
+                    <div class="p-2 text-center bg-light">
+                        <a href="{{ route('dashboard') }}" class="small font-weight-bold">Lihat dashboard</a>
+                    </div>
+                </div>
+            </li>
             <li class="nav-item d-none d-md-flex align-items-center mr-3 text-muted">
                 <i class="far fa-calendar-alt mr-2"></i>{{ now()->translatedFormat('d M Y') }}
             </li>
@@ -399,12 +482,12 @@
 
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
         <a href="{{ route('dashboard') }}" class="brand-link">
-            <span class="brand-icon">
-                <i class="fas fa-tasks"></i>
+            <span class="brand-logo-frame">
+                <img src="{{ asset('images/SCM-transparent.png') }}" alt="SCM" class="brand-logo">
             </span>
             <span class="brand-copy">
                 <strong>HRGA Activity</strong>
-                <small>Daily monitoring</small>
+                <small>PT Sulawesi Cahaya Mineral</small>
             </span>
         </a>
 
@@ -508,7 +591,7 @@
 
     <footer class="main-footer d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
         <div><strong>HRGA Daily Activity</strong> &copy; {{ date('Y') }}</div>
-        <div class="mt-1 mt-sm-0">Monitoring pekerjaan, komentar, dan progress harian.</div>
+        <div class="mt-1 mt-sm-0">PT Sulawesi Cahaya Mineral</div>
     </footer>
 </div>
 
@@ -561,6 +644,13 @@
         $('#confirmActionModal').modal('hide');
         pendingConfirmForm.submit();
     });
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('{{ asset('sw.js') }}').catch(function () {});
+        });
+    }
 </script>
 @stack('scripts')
 </body>

@@ -54,26 +54,6 @@
         padding: .12rem .25rem;
     }
 
-    .calendar-reminder-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: .75rem;
-    }
-
-    .calendar-reminder-item {
-        min-height: 92px;
-        border: 1px solid #e5edf7;
-        border-radius: .6rem;
-        padding: .85rem;
-        background: #fff;
-    }
-
-    .calendar-reminder-item strong {
-        display: block;
-        line-height: 1.25;
-        margin-bottom: .4rem;
-    }
-
     .calendar-event-chip {
         display: inline-flex;
         align-items: center;
@@ -125,46 +105,104 @@
     </div>
 
     <div class="card">
-        <div class="card-header border-0 d-flex align-items-center justify-content-between">
-            <h3 class="card-title font-weight-bold">Pengingat Terdekat</h3>
-            <span class="text-muted small">{{ $calendarEvents->where('event_date', '>=', today())->count() }} event mendatang</span>
-        </div>
-        <div class="card-body">
-            <div class="calendar-reminder-grid">
-                @forelse ($calendarEvents->where('event_date', '>=', today())->take(8) as $event)
-                    <div class="calendar-reminder-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="pr-2">
-                                <strong>{{ $event->title }}</strong>
-                                <div class="small text-muted">
-                                    {{ $event->event_date->format('d/m/Y') }}
-                                    @if ($event->start_time)
-                                        - {{ substr($event->start_time, 0, 5) }}
-                                    @endif
-                                </div>
-                                <span class="calendar-event-chip mt-2" style="background: {{ $event->color }}">{{ $event->type_label }}</span>
-                            </div>
-                            @if (auth()->user()->isAdmin())
-                                <div class="table-action-group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#editEvent{{ $event->id }}" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <form method="POST" action="{{ route('calendar.destroy', $event) }}" data-confirm="Hapus event kalender ini?">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-muted">Tidak ada pengingat terdekat.</div>
-                @endforelse
+        <div class="card-header border-0">
+            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between">
+                <div class="mb-3 mb-lg-0">
+                    <h3 class="card-title font-weight-bold">Daftar Event Kalender</h3>
+                    <div class="text-muted small mt-1">Cek event, hari nasional, cuti bersama, dan meeting penting dari tabel ini.</div>
+                </div>
+                <span class="text-muted small">{{ $calendarEvents->total() }} event</span>
             </div>
         </div>
+        <div class="card-body border-top">
+            <form method="GET" action="{{ route('calendar.index') }}" class="row align-items-end">
+                <div class="col-md-8 mb-2">
+                    <label for="search">Cari Event</label>
+                    <input type="text" id="search" name="search" value="{{ request('search') }}" class="form-control" placeholder="Judul, catatan, meeting, holiday, reminder">
+                </div>
+                <div class="col-md-4 mb-2 text-md-right">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search mr-1"></i>Cari
+                    </button>
+                    <a href="{{ route('calendar.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-sync-alt mr-1"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">Tanggal</th>
+                            <th style="width: 120px;">Jam</th>
+                            <th>Event</th>
+                            <th style="width: 160px;">Jenis</th>
+                            <th>Catatan</th>
+                            @if (auth()->user()->isAdmin())
+                                <th class="text-right" style="width: 120px;">Aksi</th>
+                            @endif
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($calendarEvents as $event)
+                            <tr>
+                                <td>
+                                    <strong>{{ $event->event_date->format('d/m/Y') }}</strong>
+                                    <div class="small text-muted">{{ $event->event_date->translatedFormat('D') }}</div>
+                                </td>
+                                <td>
+                                    @if ($event->start_time || $event->end_time)
+                                        {{ $event->start_time ? substr($event->start_time, 0, 5) : '-' }}
+                                        @if ($event->end_time)
+                                            - {{ substr($event->end_time, 0, 5) }}
+                                        @endif
+                                    @else
+                                        <span class="text-muted">Full day</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <strong>{{ $event->title }}</strong>
+                                    @if ($event->is_national_holiday)
+                                        <div class="small text-muted">Hari libur/cuti bersama nasional</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="calendar-event-chip" style="background: {{ $event->color }}">{{ $event->type_label }}</span>
+                                </td>
+                                <td class="text-muted">{{ \Illuminate\Support\Str::limit($event->description ?: '-', 90) }}</td>
+                                @if (auth()->user()->isAdmin())
+                                    <td class="text-right">
+                                        <span class="table-action-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#editEvent{{ $event->id }}" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <form method="POST" action="{{ route('calendar.destroy', $event) }}" data-confirm="Hapus event kalender ini?">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </span>
+                                    </td>
+                                @endif
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ auth()->user()->isAdmin() ? 6 : 5 }}" class="text-center text-muted py-4">Event tidak ditemukan.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @if ($calendarEvents->hasPages())
+            <div class="card-footer">
+                {{ $calendarEvents->links() }}
+            </div>
+        @endif
     </div>
 </div>
 
